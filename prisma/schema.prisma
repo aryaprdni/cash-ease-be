@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String     @id @default(uuid()) @db.Uuid
+  name             String
+  bank             String
+  account_number   String     @map("account_number")
+  balance          Int        @default(0)
+
+  created_by       String?    @db.Uuid
+  updated_by       String?    @db.Uuid
+  created_at       DateTime   @default(now()) @map("created_at")
+  updated_at       DateTime   @updatedAt @map("updated_at")
+
+  creator          User?      @relation("UserCreatedUsers", fields: [created_by], references: [id])
+  updater          User?      @relation("UserUpdatedUsers", fields: [updated_by], references: [id])
+  created_users    User[]     @relation("UserCreatedUsers")
+  updated_users    User[]     @relation("UserUpdatedUsers")
+
+  top_ups              TopUp[]
+  created_top_ups      TopUp[]    @relation("UserCreatedTopUps")
+  updated_top_ups      TopUp[]    @relation("UserUpdatedTopUps")
+
+  sent_transfers       Transfer[] @relation("sent_transfers")
+  received_transfers   Transfer[] @relation("received_transfers")
+  created_transfers    Transfer[] @relation("UserCreatedTransfers")
+  updated_transfers    Transfer[] @relation("UserUpdatedTransfers")
+
+  @@map("users")
+}
+
+model TopUp {
+  id              String   @id @default(uuid()) @db.Uuid
+  user_id         String   @map("user_id") @db.Uuid
+  amount          Int
+
+  created_by      String?  @db.Uuid
+  updated_by      String?  @db.Uuid
+  created_at      DateTime @default(now()) @map("created_at")
+  updated_at      DateTime @updatedAt @map("updated_at")
+
+  user            User     @relation(fields: [user_id], references: [id])
+  creator         User?    @relation("UserCreatedTopUps", fields: [created_by], references: [id])
+  updater         User?    @relation("UserUpdatedTopUps", fields: [updated_by], references: [id])
+  
+  @@map("top_ups")
+}
+
+model Transfer {
+  id              String   @id @default(uuid()) @db.Uuid
+  sender_id       String   @map("sender_id") @db.Uuid
+  receiver_id     String   @map("receiver_id") @db.Uuid
+  amount          Int
+
+  created_by      String?  @db.Uuid
+  updated_by      String?  @db.Uuid
+  created_at      DateTime @default(now()) @map("created_at")
+  updated_at      DateTime @updatedAt @map("updated_at")
+
+  sender          User     @relation("sent_transfers", fields: [sender_id], references: [id])
+  receiver        User     @relation("received_transfers", fields: [receiver_id], references: [id])
+  creator         User?    @relation("UserCreatedTransfers", fields: [created_by], references: [id])
+  updater         User?    @relation("UserUpdatedTransfers", fields: [updated_by], references: [id])
+
+  @@map("transfers")
+}
+
