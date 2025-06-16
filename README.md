@@ -17,8 +17,8 @@ git clone https://github.com/aryaprdni/cash-ease-be
 cd nestjs-takehome (pastikan pathnya sudah sesuai)
 
 # Install dependensi
-npm install atau yarn install
+npm install atau yarn install (pastikan pathnya sudah sesuai)
 
 # Jalankan server
-npm start atau yarn start
+npm start atau yarn start (pastikan pathnya sudah sesuai)
 ```
